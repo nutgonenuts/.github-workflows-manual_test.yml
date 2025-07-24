@@ -24,18 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install selenium webdriver-manager
 
-      # Step 4: Install Chrome & ChromeDriver via Action
-      - name: Set up Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-
-      - name: Set up ChromeDriver
-        uses: nanasess/setup-chromedriver@v2
-        with:
-          chromedriver-version: latest
-
-      # Step 5: Run booking bot
+      # Step 4: Run booking bot
       - name: Run booking bot
         env:
           PARKALOT_EMAIL: ${{ secrets.PARKALOT_EMAIL }}
