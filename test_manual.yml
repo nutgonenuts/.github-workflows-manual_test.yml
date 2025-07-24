@@ -1,0 +1,15 @@
+import sys
+import datetime
+
+# --- Target Date ---
+if '--test' in sys.argv:
+    target_date = datetime.date.today() + datetime.timedelta(days=1)
+else:
+    target_date = datetime.date.today() + datetime.timedelta(days=14)
+
+target_day = target_date.strftime("%A")
+target_day_num = target_date.strftime("%-d")
+target_month = target_date.strftime("%B")
+target_label = f"{target_day} {target_day_num} {target_month}"
+
+print(f"Booking attempt for {target_label}...")
