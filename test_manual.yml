@@ -1,19 +1,12 @@
-name: Test Parkalot Bot
+import sys
+import datetime
+import os
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-on:
-  workflow_dispatch:  # Allows manual trigger from the GitHub Actions tab
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-
-      - name: Run script in test mode
-        run: python parkalot_bot.py --test
+# --- Credentials from GitHub Secrets ---
+PARKALOT_EMAIL = os.getenv("
