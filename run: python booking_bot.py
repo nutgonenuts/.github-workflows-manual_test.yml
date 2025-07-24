@@ -1,40 +1,49 @@
-import sys
-import datetime
+import os
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# --- Selenium Setup ---
+# --- Credentials from secrets ---
+EMAIL = os.getenv("PARKALOT_EMAIL")
+PASSWORD = os.getenv("PARKALOT_PASSWORD")
+
+# --- Setup Chrome for GitHub Actions ---
 options = Options()
 options.add_argument("--headless")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
-
 driver = webdriver.Chrome(options=options)
 
-print("Starting Parkalot Booking Bot...")
+try:
+    # --- Step 1: Go to login page ---
+    driver.get("https://app.parkalot.io/#/login")
+    print("Opened Parkalot login page...")
 
-# Log in
-driver.get("https://your-parking-site.com/login")
-driver.find_element(By.ID, "email").send_keys("YOUR_EMAIL")
-driver.find_element(By.ID, "password").send_keys("YOUR_PASSWORD")
-driver.find_element(By.ID, "login-button").click()
+    # --- Step 2: Enter login details ---
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='email']"))).send_keys(EMAIL)
+    driver.find_element(By.XPATH, "//input[@placeholder='password']").send_keys(PASSWORD)
+    driver.find_element(By.XPATH, "//button[contains(text(), 'LOG IN')]").click()
+    print("Logged in successfully...")
 
-# Wait for page to load
-WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "booking-calendar")))
+    # --- Step 3: Wait for dashboard ---
+    WebDriverWait(driver, 15).until(EC.url_contains("dashboard"))
+    print("Dashboard loaded.")
 
-# --- Book All Available Days ---
-dates = driver.find_elements(By.CLASS_NAME, "available-date")  # Adjust selector based on site
+    # --- Step 4: Book all available days ---
+    # This step needs the actual structure of booking buttons on the dashboard.
+    # Assuming buttons with class 'reserve-slot':
+    slots = driver.find_elements(By.XPATH, "//button[contains(text(), 'Book')]")
+    for slot in slots:
+        try:
+            slot.click()
+            print("Booked a slot.")
+            time.sleep(1)
+        except:
+            print("Failed to book one slot.")
 
-for date in dates:
-    try:
-        print(f"Attempting to book {date.text}...")
-        date.click()
-        WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, "book-button"))).click()
-        print(f"Booked {date.text} successfully!")
-    except Exception as e:
-        print(f"Could not book {date.text}: {e}")
-
-driver.quit()
+finally:
+    driver.quit()
+    print("Bot finished.")
