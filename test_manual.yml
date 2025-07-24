@@ -1,12 +1,11 @@
-name: Parkalot Booking Bot
+name: Parkalot Test Run
 
 on:
   workflow_dispatch:
 
 jobs:
-  booking:
+  test-booking:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -16,27 +15,11 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Chrome
-        run: |
-          sudo apt update
-          sudo apt install -y wget unzip
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt install -y ./google-chrome-stable_current_amd64.deb
+      - name: Install dependencies
+        run: pip install selenium
 
-      - name: Install ChromeDriver
-        run: |
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          wget -q "https://chromedriver.storage.googleapis.com/$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip"
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/chromedriver
-          sudo chmod +x /usr/local/bin/chromedriver
-
-      - name: Install Python dependencies
-        run: |
-          pip install selenium
-
-      - name: Run booking bot
+      - name: Run test booking script
         env:
           PARKALOT_EMAIL: ${{ secrets.PARKALOT_EMAIL }}
           PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
-        run: python parkalot_bot.py
+        run: python test_booking.py
