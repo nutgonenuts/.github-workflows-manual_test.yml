@@ -24,13 +24,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install selenium
 
-      # Step 4: Install Chrome and ChromeDriver via apt
+      # Step 4: Install Chrome and ChromeDriver
       - name: Install Chrome and ChromeDriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium-chromedriver
-          sudo ln -s /usr/lib/chromium-browser/chromedriver /usr/local/bin/chromedriver
+          sudo apt-get install -y google-chrome-stable
+          CHROME_VERSION=$(google-chrome --version | grep -oE '[0-9]+')
+          DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION})
+          wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
 
-      # Step 5: Run your booking bot script
+      # Step 5: Run booking bot
       - name: Run booking bot
+        env:
+          PARKALOT_EMAIL: ${{ secrets.PARKALOT_EMAIL }}
+          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
         run: python booking_bot.py
