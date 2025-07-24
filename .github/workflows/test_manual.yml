@@ -1,24 +1,15 @@
-name: Parkalot Test Run
+import sys
+import datetime
 
-on:
-  workflow_dispatch:
+if '--test' in sys.argv:
+    # Find the next Sunday
+    today = datetime.date.today()
+    days_ahead = 6 - today.weekday()  # Sunday = 6
+    if days_ahead <= 0:
+        days_ahead += 7
+    target_date = today + datetime.timedelta(days=days_ahead)
+else:
+    target_date = datetime.date.today() + datetime.timedelta(days=14)
 
-jobs:
-  test-booking:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: pip install selenium
-
-      - name: Run Parkalot Bot for Sunday
-        env:
-          PARKALOT_EMAIL: ${{ secrets.PARKALOT_EMAIL }}
-          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD
+target_label = target_date.strftime("%A %d %B")
+print(f"Booking attempt for {target_label}...")
