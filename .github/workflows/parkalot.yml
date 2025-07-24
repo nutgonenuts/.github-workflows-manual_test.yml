@@ -1,0 +1,34 @@
+name: Parkalot Booking Bot
+
+on:
+  workflow_dispatch:        # Allows manual run from Actions tab
+  schedule:
+    - cron: "10 0 * * 3,4"  # Runs at 00:10 UTC on Wednesday & Thursday
+
+jobs:
+  booking:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Chrome & Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4 default-jdk
+          sudo apt-get install -y libnss3 libxss1 libappindicator1 libindicator7
+          sudo apt-get install -y fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3
+          sudo apt-get install -y libgtk-3-0 libnspr4 libx11-xcb1 xdg-utils
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install -y ./google-chrome-stable_current_amd64.deb
+          python -m pip install --upgrade pip
+          pip install selenium webdriver-manager
+
+      - name: Run Booking Bot
+        env:
+          PARKALOT_EMAIL: ${{ secrets.PARKAL
