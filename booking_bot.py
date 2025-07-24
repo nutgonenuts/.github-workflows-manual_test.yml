@@ -10,41 +10,45 @@ from selenium.webdriver.support import expected_conditions as EC
 EMAIL = os.getenv("PARKALOT_EMAIL")
 PASSWORD = os.getenv("PARKALOT_PASSWORD")
 
-# --- Setup Chrome for GitHub Actions ---
+print("Starting booking bot...")
+
+# --- Chrome Options for GitHub Actions ---
 options = Options()
 options.add_argument("--headless")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
 driver = webdriver.Chrome(options=options)
+driver.get("https://app.parkalot.io/#/login")
+print("Opened Parkalot login page.")
 
 try:
-    # --- Open Parkalot Login Page ---
-    driver.get("https://app.parkalot.io/#/login")
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "email")))
-
-    # --- Log In ---
-    driver.find_element(By.NAME, "email").send_keys(EMAIL)
-    driver.find_element(By.NAME, "password").send_keys(PASSWORD)
-    driver.find_element(By.XPATH, "//button[contains(text(), 'LOG IN')]").click()
-
-    # Wait for dashboard to load
-    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-    print("Login successful!")
+    # --- Login ---
+    WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.NAME, "email"))).send_keys(EMAIL)
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(PASSWORD)
+    WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'LOG IN')]"))).click()
+    print("Login submitted. Waiting for dashboard...")
+    
+    # --- Wait for dashboard ---
+    WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+    print("Logged in successfully.")
 
     # --- Book all available days ---
-    time.sleep(5)  # Allow page to fully load
-    booking_buttons = driver.find_elements(By.XPATH, "//button[contains(text(), 'Book')]")
-
-    for i, button in enumerate(booking_buttons, start=1):
-        try:
-            button.click()
-            print(f"Booked day #{i}")
-            time.sleep(2)
-        except Exception as e:
-            print(f"Failed to book day #{i}: {e}")
+    buttons = driver.find_elements(By.XPATH, "//button[contains(., 'Book')]")
+    if not buttons:
+        print("No booking buttons found!")
+    else:
+        for i, btn in enumerate(buttons, start=1):
+            try:
+                btn.click()
+                print(f"Booked day #{i}")
+                time.sleep(1)
+            except Exception as e:
+                print(f"Failed to click button #{i}: {e}")
 
 except Exception as e:
-    print(f"Error: {e}")
+    print(f"Error during booking process: {e}")
+
 finally:
     driver.quit()
+    print("Booking bot finished.")
