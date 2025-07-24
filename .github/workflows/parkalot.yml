@@ -31,4 +31,6 @@ jobs:
 
       - name: Run Booking Bot
         env:
-          PARKALOT_EMAIL: ${{ secrets.PARKAL
+          PARKALOT_EMAIL: ${{ secrets.PARKALOT_EMAIL }}
+          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+        run: python parkalot_bot.py
