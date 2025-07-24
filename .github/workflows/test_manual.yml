@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout your repository
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -24,6 +24,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install selenium
 
-      # Step 4: Run your booking bot script
+      # Step 4: Run booking bot
       - name: Run booking bot
-        run: python "python booking_bot.py"
+        env:
+          PARKALOT_EMAIL: ${{ secrets.PARKALOT_EMAIL }}
+          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+        run: python booking_bot.py
