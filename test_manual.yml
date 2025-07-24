@@ -26,7 +26,4 @@ jobs:
 
       # Step 4: Run booking bot
       - name: Run booking bot
-        env:
-          PARKALOT_EMAIL: ${{ secrets.PARKALOT_EMAIL }}
-          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
         run: python booking_bot.py
