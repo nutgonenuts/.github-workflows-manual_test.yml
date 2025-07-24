@@ -1,36 +1,38 @@
-import datetime
-import os
-import time
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+name: Parkalot Booking Bot
 
-print("Starting Parkalot Booking Bot...")
+on:
+  workflow_dispatch:
 
-# --- Credentials ---
-PARKALOT_EMAIL = os.getenv("PARKALOT_EMAIL")
-PARKALOT_PASSWORD = os.getenv("PARKALOT_PASSWORD")
-print(f"Loaded email: {PARKALOT_EMAIL is not None}, password: {PARKALOT_PASSWORD is not None}")
+jobs:
+  booking:
+    runs-on: ubuntu-latest
 
-# --- Calculate Target Date ---
-target_date = datetime.date.today() + datetime.timedelta(days=14)
-target_day = target_date.strftime("%A")
-target_day_num = target_date.strftime("%-d")
-target_month = target_date.strftime("%B")
-target_label = f"{target_day} {target_day_num} {target_month}"
-print(f"Booking attempt for {target_label}...")
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-# --- Selenium Setup ---
-options = Options()
-options.add_argument("--headless")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-try:
-    driver = webdriver.Chrome(options=options)
-    print("Chrome started successfully...")
-except Exception as e:
-    print(f"Error starting Chrome: {e}")
-    exit(1)
+      - name: Install Chrome & ChromeDriver
+        run: |
+          sudo apt update
+          sudo apt install -y wget unzip curl
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install -y ./google-chrome-stable_current_amd64.deb
+          DRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+          wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+
+      - name: Install Python dependencies
+        run: pip install selenium
+
+      - name: Run booking bot
+        env:
+          PARKALOT_EMAIL: ${{ secrets.PARKALOT_EMAIL }}
+          PARKALOT_PASSWORD: ${{ secrets.PARKALOT_PASSWORD }}
+        run: python parkalot_bot.py
